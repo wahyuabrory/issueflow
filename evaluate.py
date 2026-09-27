@@ -34,4 +34,38 @@ correct = sum(row[2] for row in rows if row[0] == row[1])
 
 print(f"\nAgreement: {correct}/{total} = {correct / total:.1%}")
 
+mismatches = con.execute("""
+WITH human AS (
+    SELECT
+        id,
+        number,
+        title,
+        labels,
+        CASE
+            WHEN labels = ['bug'] THEN 'bug'
+            WHEN labels = ['question'] THEN 'question'
+            WHEN labels = ['feature'] THEN 'feature'
+            WHEN labels = ['docs'] THEN 'docs'
+        END AS human_type
+    FROM issues
+)
+SELECT
+    h.number,
+    h.title,
+    h.human_type,
+    c.issue_type,
+    c.confidence
+FROM human h
+JOIN classifications c
+    ON h.id = c.issue_id
+WHERE h.human_type IS NOT NULL
+  AND h.human_type != c.issue_type
+ORDER BY c.confidence DESC
+""").fetchall()
+
+print("\nMismatches:")
+
+for row in mismatches:
+    print(row)
+
 con.close()

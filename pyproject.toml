@@ -8,5 +8,6 @@ dependencies = [
     "duckdb>=1.5.5",
     "httpx>=0.28.1",
     "polars[rtcompat]>=1.44.2",
+    "prefect>=3.8.7",
     "python-dotenv>=1.2.3",
 ]

@@ -8,12 +8,15 @@ SELECT *
 FROM read_parquet('data/issues.parquet')
 """)
 
-result = con.execute("""
-SELECT state, COUNT(*) AS count
-FROM issues
-GROUP BY state
-""").fetchall()
-
-print(result)
+print(
+  con.execute(
+    """
+    SELECT repo, COUNT(*) AS n
+    FROM issues
+    GROUP BY repo
+    ORDER BY n DESC
+    """
+  ).fetchall()
+)
 
 con.close()

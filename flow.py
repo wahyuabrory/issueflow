@@ -27,6 +27,10 @@ def classify():
 def evaluate():
     subprocess.run(["uv", "run", "evaluate.py"], check=True)
 
+@task
+def analytics():
+    subprocess.run(["uv", "run", "analytics.py"], check=True)
+
 
 @flow(name="issueflow")
 def pipeline():
@@ -35,7 +39,7 @@ def pipeline():
     load()
     classify()
     evaluate()
-
+    analytics()
 
 if __name__ == "__main__":
     pipeline()

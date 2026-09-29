@@ -5,31 +5,32 @@ from prefect import flow, task
 @task(retries=2)
 
 def ingest():
-    subprocess.run(["uv", "run", "ingest.py"], check=True)
+    subprocess.run(["uv", "run", "src/issueflow/ingest.py"], check=True)
 
 
 @task
 def transform():
-    subprocess.run(["uv", "run", "transform.py"], check=True)
+    subprocess.run(["uv", "run", "src/issueflow/transform.py"], check=True)
 
 
 @task
 def load():
-    subprocess.run(["uv", "run", "load.py"], check=True)
+    subprocess.run(["uv", "run", "src/issueflow/load.py"], check=True)
 
 
 @task(retries=2)
 def classify():
-    subprocess.run(["uv", "run", "classify.py"], check=True)
+    subprocess.run(["uv", "run", "src/issueflow/classify.py"], check=True)
 
 
 @task
 def evaluate():
-    subprocess.run(["uv", "run", "evaluate.py"], check=True)
+    subprocess.run(["uv", "run", "src/issueflow/evaluate.py"], check=True)
+
 
 @task
 def analytics():
-    subprocess.run(["uv", "run", "analytics.py"], check=True)
+    subprocess.run(["uv", "run", "src/issueflow/analytics.py"], check=True)
 
 
 @flow(name="issueflow")

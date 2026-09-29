@@ -15,6 +15,7 @@ df = pl.DataFrame(
         "created_at": [x["created_at"] for x in raw],
         "closed_at": [x["closed_at"] for x in raw],
         "labels": [[label["name"] for label in x["labels"]] for x in raw],
+        "updated_at": [x["updated_at"] for x in raw],
     }
 )
 

@@ -10,12 +10,16 @@ api_key = os.environ["TYPESAFE_API_KEY"]
 con = duckdb.connect("data/issueflow.duckdb")
 
 issues = con.execute("""
-SELECT i.id, i.title, i.body
+SELECT
+    i.id,
+    i.title,
+    i.body,
+    i.updated_at
 FROM issues i
 LEFT JOIN classifications c
     ON i.id = c.issue_id
 WHERE c.issue_id IS NULL
-LIMIT 100
+   OR c.issue_updated_at != i.updated_at
 """).fetchall()
 
 con.execute("""
@@ -26,7 +30,7 @@ CREATE TABLE IF NOT EXISTS classifications (
 )
 """)
 
-for issue_id, title, body in issues:
+for issue_id, title, body, updated_at in issues:
     payload = {
         "model": "jev-latest",
         "state": {
@@ -60,8 +64,26 @@ for issue_id, title, body in issues:
     answer = response.json()["answers"]["issue_type"]
 
     con.execute(
-        "INSERT INTO classifications VALUES (?, ?, ?)",
-        [issue_id, answer["choice"], answer["confidence"]],
+        "DELETE FROM classifications WHERE issue_id = ?",
+        [issue_id],
+    )
+
+    con.execute(
+        """
+        INSERT INTO classifications (
+            issue_id,
+            issue_type,
+            confidence,
+            issue_updated_at
+        )
+        VALUES (?, ?, ?, ?)
+        """,
+        [
+            issue_id,
+            answer["choice"],
+            answer["confidence"],
+            updated_at,
+        ],
     )
 
     print(issue_id, answer["choice"], answer["confidence"])

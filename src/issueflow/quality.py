@@ -1,11 +1,19 @@
+import argparse
 import sys
+
 import duckdb
 
 
-DB_PATH = "data/issueflow.duckdb"
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--db-path",
+    default="data/issueflow.duckdb",
+)
+args = parser.parse_args()
+
 CLASSIFIER_VERSION = "v2"
 
-con = duckdb.connect(DB_PATH)
+con = duckdb.connect(args.db_path)
 
 
 def scalar(query, params=None):

@@ -16,7 +16,3 @@ dependencies = [
 dev = [
     "pytest>=9.1.1",
 ]
-
-[tool.uv.workspace]
-members = ["code/*"]
-exclude = ["code/issueflow"]

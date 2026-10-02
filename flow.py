@@ -1,41 +1,62 @@
 import subprocess
+from time import perf_counter
 
-from prefect import flow, task
+from prefect import flow, get_run_logger, task
+
+
+def run_stage(name, script):
+    logger = get_run_logger()
+    started = perf_counter()
+
+    logger.info("%s started", name)
+
+    try:
+        subprocess.run(
+            ["uv", "run", f"src/issueflow/{script}"],
+            check=True,
+        )
+    except subprocess.CalledProcessError:
+        duration = perf_counter() - started
+        logger.exception("%s failed duration=%.2fs", name, duration)
+        raise
+
+    duration = perf_counter() - started
+    logger.info("%s completed duration=%.2fs", name, duration)
 
 
 @task(retries=2)
 def ingest():
-    subprocess.run(["uv", "run", "src/issueflow/ingest.py"], check=True)
+    run_stage("ingest", "ingest.py")
 
 
 @task
 def transform():
-    subprocess.run(["uv", "run", "src/issueflow/transform.py"], check=True)
+    run_stage("transform", "transform.py")
 
 
 @task
 def load():
-    subprocess.run(["uv", "run", "src/issueflow/load.py"], check=True)
+    run_stage("load", "load.py")
 
 
 @task(retries=2)
 def classify():
-    subprocess.run(["uv", "run", "src/issueflow/classify.py"], check=True)
+    run_stage("classify", "classify.py")
 
 
 @task
 def quality():
-    subprocess.run(["uv", "run", "src/issueflow/quality.py"], check=True)
+    run_stage("quality", "quality.py")
 
 
 @task
 def evaluate():
-    subprocess.run(["uv", "run", "src/issueflow/evaluate.py"], check=True)
+    run_stage("evaluate", "evaluate.py")
 
 
 @task
 def analytics():
-    subprocess.run(["uv", "run", "src/issueflow/analytics.py"], check=True)
+    run_stage("analytics", "analytics.py")
 
 
 @flow(name="issueflow")

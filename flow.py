@@ -2,8 +2,8 @@ import subprocess
 
 from prefect import flow, task
 
-@task(retries=2)
 
+@task(retries=2)
 def ingest():
     subprocess.run(["uv", "run", "src/issueflow/ingest.py"], check=True)
 
@@ -24,6 +24,11 @@ def classify():
 
 
 @task
+def quality():
+    subprocess.run(["uv", "run", "src/issueflow/quality.py"], check=True)
+
+
+@task
 def evaluate():
     subprocess.run(["uv", "run", "src/issueflow/evaluate.py"], check=True)
 
@@ -39,8 +44,10 @@ def pipeline():
     transform()
     load()
     classify()
+    quality()
     evaluate()
     analytics()
+
 
 if __name__ == "__main__":
     pipeline()
